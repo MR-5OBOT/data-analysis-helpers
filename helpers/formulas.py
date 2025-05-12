@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 from helpers.utils import df_check
 
 
@@ -11,10 +12,10 @@ def winrate(wins: float, losses: float) -> float:
 def avg_metrics(
     pl_series: pd.Series = pd.Series(dtype=float),
     risk_series: pd.Series = pd.Series(dtype=float),
-    rr_series: pd.Series = pd.Series(dtype=float)
+    rr_series: pd.Series = pd.Series(dtype=float),
 ) -> tuple[float, float, float, float]:
     """
-    Calculate average win, average loss (absolute), average risk, and average risk-reward ratio 
+    Calculate average win, average loss (absolute), average risk, and average risk-reward ratio
     from given series.
 
     Args:
@@ -47,22 +48,7 @@ def avg_metrics(
     return float(avg_win), float(avg_loss), float(avg_risk), float(avg_rr)
 
 
-def avg_rr(df: pd.DataFrame) -> float:
-    df_check(df, ["pl_by_rr"])
-    if df["pl_by_rr"].empty:
-        return 0.0
-    valid_data = df["pl_by_rr"].dropna()
-    if valid_data.empty:
-        return 0.0
-    return float(valid_data.mean())
-
-
-def best_worst_trade(df: pd.DataFrame) -> tuple[float, float]:
-    df_check(df, ["pl_by_percentage"])
-    if df["pl_by_percentage"].empty:
-        return 0.0, 0.0
-
-    pl_series = pl_raw(df)
+def best_worst_trade(pl_series: pd.Series) -> tuple[float, float]:
     best_trade_value = pl_series.max() or 0.0
     worst_trade_value = pl_series.min() or 0.0
     return float(best_trade_value), float(worst_trade_value)
@@ -114,8 +100,12 @@ def durations(df: pd.DataFrame) -> tuple[float, float]:
 
     try:
         # Specify the expected format to avoid warnings
-        df["entry_time"] = pd.to_datetime(df["entry_time"], format="%H:%M:%S", errors="coerce")
-        df["exit_time"] = pd.to_datetime(df["exit_time"], format="%H:%M:%S", errors="coerce")
+        df["entry_time"] = pd.to_datetime(
+            df["entry_time"], format="%H:%M:%S", errors="coerce"
+        )
+        df["exit_time"] = pd.to_datetime(
+            df["exit_time"], format="%H:%M:%S", errors="coerce"
+        )
     except ValueError:
         return 0.0, 0.0
 
@@ -123,10 +113,14 @@ def durations(df: pd.DataFrame) -> tuple[float, float]:
     if df["entry_time"].isna().all() or df["exit_time"].isna().all():
         return 0.0, 0.0
 
-    df["duration_minutes"] = (df["exit_time"] - df["entry_time"]).dt.total_seconds() / 60
+    df["duration_minutes"] = (
+        df["exit_time"] - df["entry_time"]
+    ).dt.total_seconds() / 60
 
     # Filter only the rows where 'outcome' is "WIN" and 'duration_minutes' > 0
-    only_wins = df[(df["duration_minutes"] > 0) & (df["outcome"] == "WIN")]["duration_minutes"]
+    only_wins = df[(df["duration_minutes"] > 0) & (df["outcome"] == "WIN")][
+        "duration_minutes"
+    ]
     min_duration = only_wins.min() if not only_wins.empty else 0.0
     max_duration = only_wins.max() if not only_wins.empty else 0.0
 
@@ -160,7 +154,6 @@ def stats_table(df: pd.DataFrame) -> dict:
     total_trades = len(df) if df is not None else 0
     pl_values = pl_raw(df)
     total_pl = pl_values.sum()
-
 
     table = {
         "Total Trades": total_trades,
