@@ -1,0 +1,15 @@
+[project]
+name = "data-analysis-templates"
+version = "0.1.0"
+description = "My data analysis reports & presentations maker"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "matplotlib>=3.10.3",
+    "seaborn>=0.13.2",
+    "numpy>=2.2.5",
+    "pandas>=2.2.3",
+    "streamlit>=1.45.0",
+    "python-dotenv>=1.1.0",
+    "python-telegram-bot>=22.0",
+]

@@ -1,0 +1,19 @@
+.env
+__pycache__/
+
+# Virtual environment
+env/
+venv/
+.venv/
+.env/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Logs and local settings
+*.log
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
