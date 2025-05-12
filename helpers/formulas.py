@@ -8,55 +8,43 @@ def winrate(wins: float, losses: float) -> float:
     return wins / total if total > 0 else 0.0
 
 
-def winning_trades(df: pd.DataFrame) -> float:
-    df_check(df, ["outcome"])
-    if df["outcome"].empty:
-        return 0.0
-    outcomes = df["outcome"]
-    wins = (outcomes == "WIN").sum()
-    return wins
+def avg_metrics(
+    pl_series: pd.Series = pd.Series(dtype=float),
+    risk_series: pd.Series = pd.Series(dtype=float),
+    rr_series: pd.Series = pd.Series(dtype=float)
+) -> tuple[float, float, float, float]:
+    """
+    Calculate average win, average loss (absolute), average risk, and average risk-reward ratio 
+    from given series.
 
+    Args:
+        pl_series (pd.Series): Series of profit/loss values. Defaults to empty.
+        risk_series (pd.Series): Series of risk values. Defaults to empty.
+        rr_series (pd.Series): Series of risk-reward ratios. Defaults to empty.
 
-def breakevens_trades(df: pd.DataFrame) -> float:
-    df_check(df, ["outcome"])
-    if df["outcome"].empty:
-        return 0.0
-    outcomes = df["outcome"]
-    be = (outcomes == "BE").sum()
-    return be
+    Returns:
+        tuple: (avg_win, avg_loss, avg_risk, avg_rr) as floats.
 
-
-def lossing_trades(df: pd.DataFrame) -> float:
-    df_check(df, ["outcome"])
-    if df["outcome"].empty:
-        return 0.0
-    outcomes = df["outcome"]
-    losses = (outcomes == "LOSS").sum()
-    return losses
-
-
-def avg_wl(df: pd.DataFrame) -> tuple[float, float]:
-    df_check(df, ["pl_by_percentage"])
-    if df["pl_by_percentage"].empty:
-        return 0.0, 0.0
-
-    pl_series = pl_raw(df)
+    Notes:
+        - The function handles missing or empty series by returning 0.0 for NaN values.
+    """
+    # Calculate average win
     avg_win = pl_series[pl_series > 0].mean()
-    avg_loss = abs(pl_series[pl_series < 0].mean())  # <-- Make loss positive here
-
     avg_win = 0.0 if pd.isna(avg_win) else avg_win
+
+    # Calculate average loss (absolute value)
+    avg_loss = abs(pl_series[pl_series < 0].mean())
     avg_loss = 0.0 if pd.isna(avg_loss) else avg_loss
 
-    return float(avg_win), float(avg_loss)
+    # Calculate average risk
+    avg_risk = risk_series.mean()
+    avg_risk = 0.0 if pd.isna(avg_risk) else avg_risk
 
+    # Calculate average risk-reward ratio
+    avg_rr = rr_series.mean()
+    avg_rr = 0.0 if pd.isna(avg_rr) else avg_rr
 
-def avg_risk(df: pd.DataFrame) -> float:
-    df_check(df, ["risk_by_percentage"])
-    if df["risk_by_percentage"].empty:
-        return 0.0
-    risk_series = risk_raw(df)
-    avg_risk = risk_series.mean() or 0.0
-    return float(avg_risk)
+    return float(avg_win), float(avg_loss), float(avg_risk), float(avg_rr)
 
 
 def avg_rr(df: pd.DataFrame) -> float:
