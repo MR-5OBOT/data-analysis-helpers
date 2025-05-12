@@ -5,3 +5,4 @@ seaborn
 python-dotenv
 streamlit
 python-telegram-bot
+python-pptx
