@@ -1,5 +1,3 @@
-# formulas.py
-
 import numpy as np
 import pandas as pd
 from helpers.utils import df_check, strict_percentage_convert
