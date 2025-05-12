@@ -1,22 +1,11 @@
 import numpy as np
 import pandas as pd
-from helpers.utils import df_check, strict_percentage_convert
+from helpers.utils import df_check
 
 
-
-def winrate(df: pd.DataFrame) -> tuple[float, float]:
-    df_check(df, ["outcome"])
-    if df["outcome"].empty:
-        return 0.0, 0.0
-
-    outcomes = df["outcome"]
-    wins = (outcomes == "WIN").sum()
-    losses = (outcomes == "LOSS").sum()
-
-    wr = (wins / (wins + losses)) if (wins + losses) > 0 else 0.0
-    wr_with_be = (wins / (len(df["outcome"]))) if (wins + losses) > 0 else 0.0
-
-    return wr, wr_with_be
+def winrate(wins: float, losses: float) -> float:
+    total = wins + losses
+    return wins / total if total > 0 else 0.0
 
 
 def winning_trades(df: pd.DataFrame) -> float:
