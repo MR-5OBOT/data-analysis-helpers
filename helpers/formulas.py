@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 
-from helpers.data_cleaning import clean_numeric_series
 from helpers.utils import df_check
 
 
@@ -55,7 +54,7 @@ def best_worst_trade(pl_series: pd.Series) -> tuple[float, float]:
     return float(best_trade_value), float(worst_trade_value)
 
 
-def max_drawdown(pl_series):
+def max_drawdown(pl_series) -> float:
     """
     Calculate the maximum drawdown from a series of cumulative P&L (or equity curve) values.
 
@@ -68,9 +67,10 @@ def max_drawdown(pl_series):
     if not isinstance(pl_series, pd.Series):
         pl_series = pd.Series(pl_series)
 
-    peak = pl_series.cummax(skipna=True)
-    drawdown = (peak - pl_series) / peak
-    max_drawdown = drawdown.max()
+    cumulative_series: pd.Series = pl_series.cumsum()
+    peak_value = cumulative_series.cummax()
+    lowest_value = cumulative_series.cummin()
+    max_drawdown = (lowest_value - peak_value) / peak_value
     return max_drawdown
 
 
