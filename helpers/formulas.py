@@ -54,24 +54,77 @@ def best_worst_trade(pl_series: pd.Series) -> tuple[float, float]:
     return float(best_trade_value), float(worst_trade_value)
 
 
-def max_drawdown(pl_series) -> float:
+def max_drawdown_from_pct_returns(
+    perTrade_returns=None, cumulative_returns=None
+) -> float:
     """
-    Calculate the maximum drawdown from a series of cumulative P&L (or equity curve) values.
+    Calculate max drawdown from a series of percentage returns or cumulative percentage returns.
 
     Parameters:
-    - pl_series (list, pd.Series): The P&L time series
+    - perTrade_returns (list or pd.Series): Raw percentage returns per period (e.g., 0.01 = 1%).
+    - cumulative_returns (list or pd.Series): Cumulative percentage returns (e.g., 0.0299 = 2.99%).
 
     Returns:
-    - max_drawdown (float): The maximum drawdown as a positive decimal (e.g., 0.15 for 15%)
-    """
-    if not isinstance(pl_series, pd.Series):
-        pl_series = pd.Series(pl_series)
+    - float: Max drawdown as a positive decimal (e.g., 0.05 for 5%).
 
-    cumulative_series: pd.Series = pl_series.cumsum()
-    peak_value = cumulative_series.cummax()
-    lowest_value = cumulative_series.cummin()
-    max_drawdown = (lowest_value - peak_value) / peak_value
-    return max_drawdown
+    Raises:
+    - ValueError: If both or neither inputs are provided, or if any peak value is -100% (causing division-by-zero).
+    """
+    if (perTrade_returns is None and cumulative_returns is None) or (
+        perTrade_returns is not None and cumulative_returns is not None
+    ):
+        raise ValueError(
+            "Provide exactly one of perTrade_returns or cumulative_returns"
+        )
+    if perTrade_returns is not None:
+        if not isinstance(perTrade_returns, pd.Series):
+            perTrade_returns = pd.Series(perTrade_returns)
+        returns_curve = (1 + perTrade_returns).cumprod() - 1  # right way to compounds
+    else:
+        if not isinstance(cumulative_returns, pd.Series):
+            cumulative_returns = pd.Series(cumulative_returns)
+        returns_curve = cumulative_returns
+
+    peak = returns_curve.cummax()
+    # Check for division-by-zero (1 + peak == 0)
+    if (1 + peak).eq(0).any():
+        raise ValueError("Cannot compute drawdown: peak value of -100% detected")
+
+    drawdown = (returns_curve - peak) / (1 + peak)
+    return -drawdown.min()  # make it positive dd value
+
+
+import pandas as pd
+
+
+def max_drawdown_from_equity(equity_balances=None) -> float:
+    """
+    Calculate max drawdown from a series of equity balances.
+
+    Parameters:
+    - equity_balances (list or pd.Series): Series of portfolio values (e.g., [1000, 1020, 980, ...]).
+
+    Returns:
+    - float: Max drawdown as a positive decimal (e.g., 0.05 for 5%).
+
+    Raises:
+    - ValueError: If equity_balances is None, empty, or contains zero/negative values.
+    """
+    if equity_balances is None or (
+        isinstance(equity_balances, (list, pd.Series)) and len(equity_balances) == 0
+    ):
+        raise ValueError("equity_balances must be provided and non-empty")
+
+    if not isinstance(equity_balances, pd.Series):
+        equity_balances = pd.Series(equity_balances)
+
+    # Check for zero or negative balances
+    if (equity_balances <= 0).any():
+        raise ValueError("equity_balances cannot contain zero or negative values")
+
+    peak = equity_balances.cummax()
+    drawdown = (equity_balances - peak) / peak
+    return -drawdown.min()
 
 
 def expectency(df: pd.DataFrame) -> float:
