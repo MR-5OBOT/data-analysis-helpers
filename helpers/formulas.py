@@ -4,7 +4,7 @@ import pandas as pd
 from helpers.utils import df_check
 
 
-def winrate(wins: float, losses: float) -> float:
+def winrate(wins: int, losses: int) -> float:
     total = wins + losses
     return wins / total if total > 0 else 0.0
 
@@ -94,9 +94,6 @@ def max_drawdown_from_pct_returns(
     return -drawdown.min()  # make it positive dd value
 
 
-import pandas as pd
-
-
 def max_drawdown_from_equity(equity_balances=None) -> float:
     """
     Calculate max drawdown from a series of equity balances.
@@ -127,20 +124,12 @@ def max_drawdown_from_equity(equity_balances=None) -> float:
     return -drawdown.min()
 
 
-def expectency(df: pd.DataFrame) -> float:
-    df_check(df, ["outcome"])
-    if df["outcome"].empty:
-        return 0.0
-
-    wins = (df["outcome"] == "WIN").sum()
-    losses = (df["outcome"] == "LOSS").sum()
-    wr = (wins / (wins + losses)) if (wins + losses) > 0 else 0.0
+def expectency(pl_series: pd.Series, wins: int, losses: int) -> float:
+    wr = winrate(wins, losses)
     lr = 1 - wr
-    avg_w = avg_wl(df)[0]
-    avg_l = avg_wl(df)[1]
-
+    avg_win, avg_loss, _, _ = avg_metrics(pl_series=pl_series)
     # Expectancy = (Win Rate * Avg Win) - (Loss Rate * Avg Loss), where Avg Loss is positive
-    expectency = (wr * avg_w) - (lr * avg_l)
+    expectency = (wr * avg_win) - (lr * avg_loss)
     return expectency
 
 
