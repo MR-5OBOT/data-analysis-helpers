@@ -133,18 +133,9 @@ def expectency(pl_series: pd.Series, wins: int, losses: int) -> float:
     return expectency
 
 
+###################################################### i'm here
 def durations(df: pd.DataFrame) -> tuple[float, float]:
     # Calculates the min and max duration of winning trades
-    if (
-        df is None
-        or df.empty
-        or "entry_time" not in df
-        or "exit_time" not in df
-        or df["entry_time"].empty
-        or df["exit_time"].empty
-    ):
-        return 0.0, 0.0
-
     try:
         # Specify the expected format to avoid warnings
         df["entry_time"] = pd.to_datetime(
@@ -160,17 +151,12 @@ def durations(df: pd.DataFrame) -> tuple[float, float]:
     if df["entry_time"].isna().all() or df["exit_time"].isna().all():
         return 0.0, 0.0
 
-    df["duration_minutes"] = (
-        df["exit_time"] - df["entry_time"]
-    ).dt.total_seconds() / 60
+    df["minutes"] = (df["exit_time"] - df["entry_time"]).dt.total_seconds() / 60
 
-    # Filter only the rows where 'outcome' is "WIN" and 'duration_minutes' > 0
-    only_wins = df[(df["duration_minutes"] > 0) & (df["outcome"] == "WIN")][
-        "duration_minutes"
-    ]
+    # Filter only the rows where 'outcome' is "WIN" and 'minutes' > 0
+    only_wins = df[(df["minutes"] > 0) & (df["outcome"] == "WIN")]["minutes"]
     min_duration = only_wins.min() if not only_wins.empty else 0.0
     max_duration = only_wins.max() if not only_wins.empty else 0.0
-
     return float(min_duration), float(max_duration)
 
 
