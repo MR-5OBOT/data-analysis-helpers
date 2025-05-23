@@ -135,7 +135,6 @@ def expectency(pl_series: pd.Series, wins: int, losses: int) -> float:
 
 ###################################################### i'm here
 def durations(df: pd.DataFrame) -> tuple[float, float]:
-    # Calculates the min and max duration of winning trades
     try:
         # Specify the expected format to avoid warnings
         df["entry_time"] = pd.to_datetime(
@@ -174,51 +173,3 @@ def consecutive_losses(df: pd.DataFrame) -> int:
         else:
             current_streak = 0
     return max_streak
-
-
-def stats_table(df: pd.DataFrame) -> dict:
-    """
-    Returns a dictionary of statistics.
-    """
-    if df is None or df.empty:
-        print("Warning: No data to process for statistics.")
-
-    # Calculate metrics using the helper functions
-    total_trades = len(df) if df is not None else 0
-    pl_values = pl_raw(df)
-    total_pl = pl_values.sum()
-
-    table = {
-        "Total Trades": total_trades,
-        "Total P/L": total_pl,
-        "Winrate": winrate(df)[0],
-        "Winning Trades": winning_trades(df),
-        "Losing Trades": lossing_trades(df),
-        "Avg Win": avg_wl(df)[0],
-        "Avg Loss": avg_wl(df)[1],
-        "Risk": avg_risk(df),
-        "Avg RR": avg_rr(df),
-        "Best Trade": best_worst_trade(df)[0],
-        "Worst Trade": best_worst_trade(df)[1],
-        "Max Drawdown": max_drawdown(df),
-        "Expectancy": expectency(df),
-        "Min Duration (mins)": durations(df)[0],
-        "Max Duration (mins)": durations(df)[1],
-        "Max Consecutive Losses": consecutive_losses(df),
-    }
-    return table
-
-
-def term_stats(stats: dict) -> None:
-    """
-    Prints the trading statistics from a dictionary to the terminal.
-    """
-    if not stats:
-        print("No statistics available to display.")
-        return
-
-    print("\n--- Trading Statistics ---")
-    for key, value in stats.items():
-        print(f"{key:<20}: {value}")  # Use f-string formatting for alignment
-    print("-------------------------\n")
-    return

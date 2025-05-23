@@ -1,7 +1,7 @@
 [project]
-name = "data-analysis-templates"
+name = "data-analysis-helpers"
 version = "0.1.0"
-description = "My data analysis reports & presentations maker"
+description = "A helper package for data analysis tasks"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
